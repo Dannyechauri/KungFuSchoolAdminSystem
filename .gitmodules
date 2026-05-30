@@ -1,0 +1,3 @@
+[submodule "KungFuAndroidApp"]
+	path = KungFuAndroidApp
+	url = https://github.com/Dannyechauri/KungFuSchoolAndroidApp
