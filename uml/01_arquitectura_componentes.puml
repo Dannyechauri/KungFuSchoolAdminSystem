@@ -1,0 +1,104 @@
+@startuml Arquitectura del Sistema - Instituto Kung Fu
+!theme blueprint
+
+title Diagrama de Arquitectura de Componentes\nSistema de Administración - Instituto de Kung Fu
+
+skinparam componentStyle rectangle
+skinparam backgroundColor #FAFAFA
+skinparam component {
+    BackgroundColor #E8F4FD
+    BorderColor #2980B9
+    FontColor #1A252F
+}
+skinparam database {
+    BackgroundColor #FDEBD0
+    BorderColor #E67E22
+}
+skinparam node {
+    BackgroundColor #EBF5FB
+    BorderColor #1A5276
+}
+skinparam cloud {
+    BackgroundColor #F0F0F0
+    BorderColor #7F8C8D
+}
+
+actor "Director" as director
+actor "Instructor" as instructor
+actor "Alumno" as alumno
+
+node "Dispositivo Android" as android_device {
+    [App Android\nKung Fu Manager] as android_app
+    component "Módulos de la App" {
+        [Módulo Alumnos] as mod_alumnos
+        [Módulo Instructores] as mod_instructores
+        [Módulo Clases] as mod_clases
+        [Módulo Pagos] as mod_pagos
+        [Módulo Cinturones\n& Graduaciones] as mod_grados
+    }
+}
+
+cloud "Internet / Red" as internet
+
+node "Servidor de Aplicaciones" as server {
+    [Servicio Web\n(REST API)] as web_service
+    component "Controladores REST" {
+        [AlumnoController] as ctrl_alumno
+        [InstructorController] as ctrl_instructor
+        [ClaseController] as ctrl_clase
+        [PagoController] as ctrl_pago
+        [GraduacionController] as ctrl_grad
+        [AuthController] as ctrl_auth
+    }
+    [Capa de Lógica\nde Negocio] as business_logic
+    [Módulo de\nAutenticación JWT] as auth_module
+}
+
+node "Servidor de Base de Datos" as db_server {
+    database "Base de Datos SQL\n(MySQL / PostgreSQL)" as sql_db {
+        [Tablas: Alumnos\nInstructores\nDirector]
+        [Tablas: Clases\nHorarios]
+        [Tablas: Pagos\nMensualidades]
+        [Tablas: Grados\nGraduaciones]
+    }
+}
+
+' Relaciones actores con app
+director --> android_app : gestiona
+instructor --> android_app : consulta / registra
+alumno --> android_app : consulta
+
+' Relaciones internas app android
+android_app --> mod_alumnos
+android_app --> mod_instructores
+android_app --> mod_clases
+android_app --> mod_pagos
+android_app --> mod_grados
+
+' App hacia internet
+android_app --> internet : HTTPS / JSON
+
+' Internet hacia servidor
+internet --> web_service : peticiones REST
+
+' Controladores del API
+web_service --> ctrl_auth
+web_service --> ctrl_alumno
+web_service --> ctrl_instructor
+web_service --> ctrl_clase
+web_service --> ctrl_pago
+web_service --> ctrl_grad
+
+' Controladores hacia lógica de negocio
+ctrl_alumno --> business_logic
+ctrl_instructor --> business_logic
+ctrl_clase --> business_logic
+ctrl_pago --> business_logic
+ctrl_grad --> business_logic
+ctrl_auth --> auth_module
+
+' Lógica hacia BD
+business_logic --> sql_db : JDBC / ORM
+auth_module --> sql_db
+
+@enduml

@@ -1,0 +1,179 @@
+@startuml Esquema SQL - Base de Datos
+!theme blueprint
+
+title Esquema de Base de Datos SQL\nInstituto de Kung Fu
+
+skinparam backgroundColor #FAFAFA
+skinparam class {
+    BackgroundColor #D5F5E3
+    BorderColor #27AE60
+    HeaderBackgroundColor #1E8449
+    HeaderFontColor #FFFFFF
+    FontColor #1A252F
+}
+
+hide circle
+hide methods
+
+entity "personas" as personas {
+    * id_persona      : INT <<PK, AUTO_INCREMENT>>
+    --
+    * nombre          : VARCHAR(100) NOT NULL
+    * apellido_paterno: VARCHAR(100) NOT NULL
+    apellido_materno  : VARCHAR(100)
+    * fecha_nacimiento: DATE NOT NULL
+    telefono          : VARCHAR(15)
+    * email           : VARCHAR(150) UNIQUE
+    direccion         : VARCHAR(255)
+    foto_url          : VARCHAR(255)
+    * fecha_registro  : DATETIME DEFAULT NOW()
+}
+
+entity "directores" as directores {
+    * id_director   : INT <<PK, FK>>
+    --
+    rfc             : VARCHAR(13) UNIQUE
+    * fecha_inicio  : DATE NOT NULL
+}
+
+entity "instructores" as instructores {
+    * id_instructor      : INT <<PK, FK>>
+    --
+    * cinturon_actual    : VARCHAR(50) NOT NULL
+    especialidad         : VARCHAR(100)
+    * fecha_contratacion : DATE NOT NULL
+    * activo             : TINYINT(1) DEFAULT 1
+}
+
+entity "alumnos" as alumnos {
+    * id_alumno         : INT <<PK, FK>>
+    --
+    * numero_matricula  : VARCHAR(20) UNIQUE NOT NULL
+    * cinturon_actual   : VARCHAR(50) NOT NULL DEFAULT 'Blanco'
+    * fecha_ingreso     : DATE NOT NULL
+    grupo               : VARCHAR(10)
+    tutor_nombre        : VARCHAR(200)
+    tutor_telefono      : VARCHAR(15)
+    * activo            : TINYINT(1) DEFAULT 1
+}
+
+entity "usuarios" as usuarios {
+    * id_usuario    : INT <<PK, AUTO_INCREMENT>>
+    --
+    * id_persona    : INT <<FK>>
+    * username      : VARCHAR(50) UNIQUE NOT NULL
+    * password_hash : VARCHAR(255) NOT NULL
+    * rol           : ENUM('director','instructor','alumno')
+    * activo        : TINYINT(1) DEFAULT 1
+    ultimo_acceso   : DATETIME
+}
+
+entity "grados" as grados {
+    * id_grado       : INT <<PK, AUTO_INCREMENT>>
+    --
+    * nombre         : VARCHAR(50) NOT NULL
+    descripcion      : VARCHAR(255)
+    * color_cinturon : VARCHAR(30) NOT NULL
+    * orden          : INT UNIQUE NOT NULL
+}
+
+entity "clases" as clases {
+    * id_clase      : INT <<PK, AUTO_INCREMENT>>
+    --
+    * id_instructor : INT <<FK>>
+    * nombre        : VARCHAR(100) NOT NULL
+    descripcion     : VARCHAR(255)
+    * nivel         : VARCHAR(50) NOT NULL
+    * capacidad_max : INT DEFAULT 20
+    salon           : VARCHAR(50)
+}
+
+entity "horarios" as horarios {
+    * id_horario  : INT <<PK, AUTO_INCREMENT>>
+    --
+    * id_clase    : INT <<FK>>
+    * dia_semana  : ENUM('Lun','Mar','Mie','Jue','Vie','Sab','Dom')
+    * hora_inicio : TIME NOT NULL
+    * hora_fin    : TIME NOT NULL
+}
+
+entity "inscripciones" as inscripciones {
+    * id_inscripcion   : INT <<PK, AUTO_INCREMENT>>
+    --
+    * id_alumno        : INT <<FK>>
+    * id_clase         : INT <<FK>>
+    * fecha_inscripcion: DATE NOT NULL DEFAULT NOW()
+    * estado           : ENUM('activa','inactiva','suspendida') DEFAULT 'activa'
+}
+
+entity "asistencias" as asistencias {
+    * id_asistencia : INT <<PK, AUTO_INCREMENT>>
+    --
+    * id_alumno     : INT <<FK>>
+    * id_clase      : INT <<FK>>
+    * fecha         : DATE NOT NULL
+    * presente      : TINYINT(1) NOT NULL
+    justificacion   : VARCHAR(255)
+}
+
+entity "mensualidades" as mensualidades {
+    * id_mensualidad : INT <<PK, AUTO_INCREMENT>>
+    --
+    * id_director    : INT <<FK>>
+    * anio           : INT NOT NULL
+    * mes            : TINYINT NOT NULL
+    * monto_base     : DECIMAL(10,2) NOT NULL
+    descuento        : DECIMAL(5,2) DEFAULT 0.00
+    * fecha_limite   : DATE NOT NULL
+}
+
+entity "pagos" as pagos {
+    * id_pago             : INT <<PK, AUTO_INCREMENT>>
+    --
+    * id_alumno           : INT <<FK>>
+    * id_mensualidad      : INT <<FK>>
+    * monto               : DECIMAL(10,2) NOT NULL
+    * fecha_pago          : DATETIME NOT NULL
+    * metodo_pago         : ENUM('efectivo','transferencia','tarjeta')
+    referencia            : VARCHAR(100)
+    * estado              : ENUM('pendiente','pagado','vencido') DEFAULT 'pendiente'
+}
+
+entity "graduaciones" as graduaciones {
+    * id_graduacion    : INT <<PK, AUTO_INCREMENT>>
+    --
+    * id_alumno        : INT <<FK>>
+    * id_instructor    : INT <<FK>>
+    * id_grado         : INT <<FK>>
+    * fecha_evaluacion : DATE NOT NULL
+    * resultado        : ENUM('aprobado','reprobado','pendiente') DEFAULT 'pendiente'
+    calificacion       : DECIMAL(4,2)
+    observaciones      : VARCHAR(500)
+}
+
+' ========================
+' RELACIONES FK
+' ========================
+
+personas ||--o| directores     : "id_persona (herencia)"
+personas ||--o| instructores   : "id_persona (herencia)"
+personas ||--o| alumnos        : "id_persona (herencia)"
+personas ||--|| usuarios       : "id_persona"
+
+directores ||--o{ mensualidades   : "id_director"
+instructores ||--o{ clases        : "id_instructor"
+instructores ||--o{ graduaciones  : "id_instructor"
+
+clases ||--o{ horarios        : "id_clase"
+clases ||--o{ inscripciones   : "id_clase"
+clases ||--o{ asistencias     : "id_clase"
+
+alumnos ||--o{ inscripciones  : "id_alumno"
+alumnos ||--o{ asistencias    : "id_alumno"
+alumnos ||--o{ pagos          : "id_alumno"
+alumnos ||--o{ graduaciones   : "id_alumno"
+
+mensualidades ||--o{ pagos    : "id_mensualidad"
+grados ||--o{ graduaciones    : "id_grado"
+
+@enduml

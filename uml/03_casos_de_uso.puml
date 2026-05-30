@@ -1,0 +1,159 @@
+@startuml Diagrama de Casos de Uso
+!theme blueprint
+
+title Diagrama de Casos de Uso\nSistema de Administración - Instituto de Kung Fu
+
+skinparam backgroundColor #FAFAFA
+skinparam usecase {
+    BackgroundColor #EBF5FB
+    BorderColor #2471A3
+    FontColor #1A252F
+}
+skinparam actor {
+    BackgroundColor #FDEBD0
+    BorderColor #E67E22
+    FontColor #1A252F
+}
+
+left to right direction
+
+' ========================
+' ACTORES
+' ========================
+
+actor "Director" as director #Gold
+actor "Instructor" as instructor #LightBlue
+actor "Alumno" as alumno #LightGreen
+actor "Sistema\n(Servicio Web)" as sistema #LightGray
+
+' ========================
+' SISTEMA
+' ========================
+
+rectangle "Sistema de Administración\nInstituto de Kung Fu" {
+
+    ' -- Autenticación --
+    package "Autenticación y Seguridad" {
+        usecase "Iniciar Sesión" as UC01
+        usecase "Cerrar Sesión" as UC02
+        usecase "Recuperar Contraseña" as UC03
+        usecase "Gestionar Perfiles de Usuario" as UC04
+    }
+
+    ' -- Gestión de Alumnos --
+    package "Gestión de Alumnos" {
+        usecase "Registrar Alumno" as UC05
+        usecase "Editar Datos de Alumno" as UC06
+        usecase "Consultar Perfil de Alumno" as UC07
+        usecase "Dar de Baja Alumno" as UC08
+        usecase "Buscar Alumno" as UC09
+    }
+
+    ' -- Gestión de Instructores --
+    package "Gestión de Instructores" {
+        usecase "Registrar Instructor" as UC10
+        usecase "Editar Datos de Instructor" as UC11
+        usecase "Consultar Perfil de Instructor" as UC12
+        usecase "Asignar Instructor a Clase" as UC13
+    }
+
+    ' -- Gestión de Clases --
+    package "Gestión de Clases y Horarios" {
+        usecase "Crear Clase" as UC14
+        usecase "Asignar Horario" as UC15
+        usecase "Inscribir Alumno a Clase" as UC16
+        usecase "Registrar Asistencia" as UC17
+        usecase "Consultar Horario" as UC18
+    }
+
+    ' -- Pagos --
+    package "Gestión de Pagos" {
+        usecase "Registrar Pago de Mensualidad" as UC19
+        usecase "Consultar Estado de Pagos" as UC20
+        usecase "Generar Recibo de Pago" as UC21
+        usecase "Enviar Alerta de Pago Vencido" as UC22
+    }
+
+    ' -- Graduaciones --
+    package "Graduaciones y Grados" {
+        usecase "Registrar Graduación" as UC23
+        usecase "Evaluar Alumno" as UC24
+        usecase "Actualizar Cinturón" as UC25
+        usecase "Emitir Certificado" as UC26
+        usecase "Consultar Historial de Grados" as UC27
+    }
+
+    ' -- Reportes --
+    package "Reportes y Estadísticas" {
+        usecase "Ver Dashboard General" as UC28
+        usecase "Generar Reporte de Asistencias" as UC29
+        usecase "Generar Reporte Financiero" as UC30
+        usecase "Generar Reporte de Graduaciones" as UC31
+    }
+}
+
+' ========================
+' RELACIONES DE ACTORES
+' ========================
+
+' Director
+director --> UC01
+director --> UC04
+director --> UC05
+director --> UC06
+director --> UC08
+director --> UC09
+director --> UC10
+director --> UC11
+director --> UC13
+director --> UC14
+director --> UC15
+director --> UC19
+director --> UC20
+director --> UC21
+director --> UC23
+director --> UC28
+director --> UC29
+director --> UC30
+director --> UC31
+
+' Instructor
+instructor --> UC01
+instructor --> UC02
+instructor --> UC07
+instructor --> UC09
+instructor --> UC12
+instructor --> UC16
+instructor --> UC17
+instructor --> UC18
+instructor --> UC20
+instructor --> UC24
+instructor --> UC25
+instructor --> UC27
+
+' Alumno
+alumno --> UC01
+alumno --> UC02
+alumno --> UC03
+alumno --> UC07
+alumno --> UC18
+alumno --> UC20
+alumno --> UC21
+alumno --> UC27
+
+' Sistema automático
+sistema --> UC22 : programado
+sistema --> UC26 : tras aprobación
+
+' ========================
+' RELACIONES INCLUDE / EXTEND
+' ========================
+
+UC19 .> UC21 : <<include>>
+UC23 .> UC24 : <<include>>
+UC24 .> UC25 : <<extend>>\n[si aprobado]
+UC25 .> UC26 : <<extend>>
+UC20 .> UC22 : <<extend>>\n[si vencido]
+UC05 .> UC16 : <<extend>>
+
+@enduml

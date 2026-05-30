@@ -1,0 +1,125 @@
+@startuml Diagrama de Despliegue
+!theme blueprint
+
+title Diagrama de Despliegue\nSistema de Administración - Instituto de Kung Fu
+
+skinparam backgroundColor #FAFAFA
+skinparam node {
+    BackgroundColor #EBF5FB
+    BorderColor #2471A3
+    FontColor #1A252F
+}
+skinparam artifact {
+    BackgroundColor #FDEBD0
+    BorderColor #E67E22
+}
+skinparam database {
+    BackgroundColor #D5F5E3
+    BorderColor #27AE60
+}
+skinparam cloud {
+    BackgroundColor #F0F0F0
+    BorderColor #7F8C8D
+}
+
+' ========================
+' CAPA CLIENTE - MÓVIL
+' ========================
+
+node "Smartphone Android" as android <<device>> {
+    node "Android OS\n(API 26+)" as android_os {
+        artifact "kungfu-manager.apk\n(App Android)" as apk {
+            artifact "Retrofit2\n(HTTP Client)" as retrofit
+            artifact "Room Database\n(Cache Local)" as room
+            artifact "JWT Token Store\n(Shared Preferences)" as token_store
+        }
+    }
+}
+
+' ========================
+' RED
+' ========================
+
+cloud "Internet\n(HTTPS / TLS 1.3)" as internet
+
+' ========================
+' CAPA SERVIDOR - APLICACIÓN
+' ========================
+
+node "Servidor de Aplicaciones\n(Ubuntu Server 22.04 LTS)" as app_server <<server>> {
+    node "JVM / Runtime" as jvm {
+        artifact "kungfu-api.jar\n(Spring Boot REST API)" as spring_boot {
+            artifact "AuthFilter\n(Spring Security + JWT)" as security
+            artifact "Controllers\n(REST Endpoints)" as controllers
+            artifact "Services\n(Lógica de Negocio)" as services
+            artifact "JPA Repositories\n(ORM - Hibernate)" as jpa
+        }
+    }
+    node "Servidor Web\n(Nginx - Reverse Proxy)" as nginx {
+        artifact "Certificado SSL\n(Let's Encrypt)" as ssl
+    }
+}
+
+' ========================
+' CAPA BASE DE DATOS
+' ========================
+
+node "Servidor de Base de Datos\n(Ubuntu Server 22.04 LTS)" as db_server <<server>> {
+    database "MySQL 8.0\n(Base de Datos Principal)" as mysql {
+        artifact "instituto_kungfu_db" as db_schema
+    }
+    artifact "Backup Automático\n(mysqldump - cron diario)" as backup
+}
+
+' ========================
+' CAPA ALMACENAMIENTO
+' ========================
+
+node "Almacenamiento en la Nube\n(AWS S3 / Cloudinary)" as storage <<cloud>> {
+    artifact "Fotos de Alumnos\ne Instructores" as photos
+    artifact "Certificados PDF\nde Graduación" as certs
+}
+
+' ========================
+' CONEXIONES
+' ========================
+
+android_os --> internet          : HTTPS :443\nJSON/REST
+
+internet --> nginx               : HTTPS :443
+nginx --> spring_boot            : HTTP :8080\n(proxy_pass)
+
+spring_boot --> mysql            : JDBC :3306\n(Red Privada)
+mysql --> backup                 : cron\n02:00 AM
+
+spring_boot --> storage          : HTTPS\n(SDK / API)
+android_os --> storage           : HTTPS\n(descarga de assets)
+
+' ========================
+' NOTAS
+' ========================
+
+note bottom of android
+  <b>Requisitos mínimos:</b>
+  Android 8.0 (Oreo)
+  RAM: 2 GB
+  Almacenamiento: 50 MB
+end note
+
+note bottom of app_server
+  <b>Especificaciones:</b>
+  CPU: 2 vCPU
+  RAM: 4 GB
+  Almacenamiento: 40 GB SSD
+  Puerto expuesto: 443 (HTTPS)
+end note
+
+note bottom of db_server
+  <b>Especificaciones:</b>
+  CPU: 2 vCPU
+  RAM: 4 GB
+  Almacenamiento: 80 GB SSD
+  Puerto: 3306 (red privada)
+end note
+
+@enduml

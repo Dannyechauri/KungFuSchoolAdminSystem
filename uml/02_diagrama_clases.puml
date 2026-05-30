@@ -1,0 +1,200 @@
+@startuml Diagrama de Clases - Modelo de Datos
+!theme blueprint
+
+title Diagrama de Clases - Modelo de Datos\nSistema de Administración - Instituto de Kung Fu
+
+skinparam classAttributeIconSize 0
+skinparam backgroundColor #FAFAFA
+skinparam class {
+    BackgroundColor #EBF5FB
+    BorderColor #2471A3
+    HeaderBackgroundColor #2471A3
+    HeaderFontColor #FFFFFF
+    FontColor #1A252F
+}
+
+' ========================
+' JERARQUÍA DE PERSONAS
+' ========================
+
+abstract class Persona {
+    - id_persona      : INT <<PK>>
+    - nombre          : VARCHAR(100)
+    - apellido_paterno: VARCHAR(100)
+    - apellido_materno: VARCHAR(100)
+    - fecha_nacimiento: DATE
+    - telefono        : VARCHAR(15)
+    - email           : VARCHAR(150)
+    - direccion       : VARCHAR(255)
+    - foto_url        : VARCHAR(255)
+    - fecha_registro  : DATETIME
+    + getDatosCompletos() : String
+    + calcularEdad()      : INT
+}
+
+class Director {
+    - id_director   : INT <<PK>>
+    - rfc           : VARCHAR(13)
+    - fecha_inicio  : DATE
+    + gestionarInstituto()
+    + generarReportes()
+    + asignarInstructor()
+}
+
+class Instructor {
+    - id_instructor      : INT <<PK>>
+    - cinturon_actual    : VARCHAR(50)
+    - especialidad       : VARCHAR(100)
+    - fecha_contratacion : DATE
+    - activo             : BOOLEAN
+    + impartirClase()
+    + evaluarAlumno()
+    + registrarAsistencia()
+}
+
+class Alumno {
+    - id_alumno          : INT <<PK>>
+    - numero_matricula   : VARCHAR(20)
+    - cinturon_actual    : VARCHAR(50)
+    - fecha_ingreso      : DATE
+    - grupo              : VARCHAR(10)
+    - tutor_nombre       : VARCHAR(200)
+    - tutor_telefono     : VARCHAR(15)
+    - activo             : BOOLEAN
+    + inscribirse()
+    + realizarPago()
+    + solicitarGraduacion()
+}
+
+' ========================
+' CLASES Y HORARIOS
+' ========================
+
+class Clase {
+    - id_clase     : INT <<PK>>
+    - nombre       : VARCHAR(100)
+    - descripcion  : VARCHAR(255)
+    - nivel        : VARCHAR(50)
+    - capacidad_max: INT
+    - salon        : VARCHAR(50)
+    + obtenerInscritos()
+    + verificarDisponibilidad() : BOOLEAN
+}
+
+class Horario {
+    - id_horario   : INT <<PK>>
+    - dia_semana   : ENUM('Lun','Mar','Mie','Jue','Vie','Sab','Dom')
+    - hora_inicio  : TIME
+    - hora_fin     : TIME
+    + getDuracion() : INT
+}
+
+class Inscripcion {
+    - id_inscripcion  : INT <<PK>>
+    - fecha_inscripcion: DATE
+    - estado          : ENUM('activa','inactiva','suspendida')
+    + activar()
+    + suspender()
+}
+
+class Asistencia {
+    - id_asistencia : INT <<PK>>
+    - fecha         : DATE
+    - presente      : BOOLEAN
+    - justificacion : VARCHAR(255)
+    + registrar()
+}
+
+' ========================
+' PAGOS Y FINANZAS
+' ========================
+
+class Pago {
+    - id_pago         : INT <<PK>>
+    - monto           : DECIMAL(10,2)
+    - fecha_pago      : DATETIME
+    - mes_correspondiente: VARCHAR(20)
+    - metodo_pago     : ENUM('efectivo','transferencia','tarjeta')
+    - referencia      : VARCHAR(100)
+    - estado          : ENUM('pendiente','pagado','vencido')
+    + generarRecibo() : String
+    + verificarVencimiento() : BOOLEAN
+}
+
+class Mensualidad {
+    - id_mensualidad : INT <<PK>>
+    - anio           : INT
+    - mes            : INT
+    - monto_base     : DECIMAL(10,2)
+    - descuento      : DECIMAL(5,2)
+    - fecha_limite   : DATE
+    + calcularTotal() : DECIMAL
+}
+
+' ========================
+' GRADUACIONES Y GRADOS
+' ========================
+
+class Grado {
+    - id_grado       : INT <<PK>>
+    - nombre         : VARCHAR(50)
+    - descripcion    : VARCHAR(255)
+    - color_cinturon : VARCHAR(30)
+    - orden          : INT
+    + getSiguienteGrado() : Grado
+}
+
+class Graduacion {
+    - id_graduacion    : INT <<PK>>
+    - fecha_evaluacion : DATE
+    - resultado        : ENUM('aprobado','reprobado','pendiente')
+    - calificacion     : DECIMAL(4,2)
+    - observaciones    : VARCHAR(500)
+    + registrarResultado()
+    + emitirCertificado()
+}
+
+' ========================
+' AUTENTICACIÓN
+' ========================
+
+class Usuario {
+    - id_usuario  : INT <<PK>>
+    - username    : VARCHAR(50)
+    - password_hash: VARCHAR(255)
+    - rol         : ENUM('director','instructor','alumno')
+    - activo      : BOOLEAN
+    - ultimo_acceso: DATETIME
+    + autenticar(password: String) : BOOLEAN
+    + cambiarPassword()
+    + generarToken() : String
+}
+
+' ========================
+' RELACIONES DE HERENCIA
+' ========================
+
+Persona <|-- Director
+Persona <|-- Instructor
+Persona <|-- Alumno
+
+' ========================
+' RELACIONES DE ASOCIACIÓN
+' ========================
+
+Director "1" --> "0..*" Instructor      : contrata >
+Instructor "1" --> "0..*" Clase         : imparte >
+Clase "1" --> "1..*" Horario            : tiene >
+Alumno "1" --> "0..*" Inscripcion       : realiza >
+Inscripcion "0..*" --> "1" Clase        : pertenece a >
+Alumno "1" --> "0..*" Asistencia        : registra >
+Asistencia "0..*" --> "1" Clase         : en >
+Alumno "1" --> "0..*" Pago              : efectua >
+Pago "0..*" --> "1" Mensualidad         : cubre >
+Alumno "1" --> "0..*" Graduacion        : presenta >
+Instructor "1" --> "0..*" Graduacion    : evalua >
+Graduacion "0..*" --> "1" Grado         : otorga >
+Persona "1" --> "1" Usuario             : tiene cuenta >
+Director "1" --> "0..*" Mensualidad     : define >
+
+@enduml
