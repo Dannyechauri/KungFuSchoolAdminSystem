@@ -21,7 +21,7 @@ left to right direction
 ' ACTORES
 ' ========================
 
-actor "Director" as director #Gold
+actor "Administrador\n(Maestro)" as admin #Gold
 actor "Instructor" as instructor #LightBlue
 actor "Alumno" as alumno #LightGreen
 actor "Sistema\n(Servicio Web)" as sistema #LightGray
@@ -54,14 +54,14 @@ rectangle "Sistema de Administración\nInstituto de Kung Fu" {
         usecase "Registrar Instructor" as UC10
         usecase "Editar Datos de Instructor" as UC11
         usecase "Consultar Perfil de Instructor" as UC12
-        usecase "Asignar Instructor a Clase" as UC13
+        usecase "Promover Alumno a Instructor" as UC13
     }
 
     ' -- Gestión de Clases --
     package "Gestión de Clases y Horarios" {
-        usecase "Crear Clase" as UC14
-        usecase "Asignar Horario" as UC15
-        usecase "Inscribir Alumno a Clase" as UC16
+        usecase "Crear Curso" as UC14
+        usecase "Asignar Instructor a Curso" as UC15
+        usecase "Inscribir Alumno a Curso" as UC16
         usecase "Registrar Asistencia" as UC17
         usecase "Consultar Horario" as UC18
     }
@@ -81,6 +81,11 @@ rectangle "Sistema de Administración\nInstituto de Kung Fu" {
         usecase "Actualizar Cinturón" as UC25
         usecase "Emitir Certificado" as UC26
         usecase "Consultar Historial de Grados" as UC27
+        usecase "Definir Formas por Grado" as UC32
+        usecase "Definir Formas Opcionales" as UC33
+        usecase "Registrar Forma Aprendida" as UC34
+        usecase "Registrar Formas Conocidas\nde Instructor" as UC35
+        usecase "Catalogar Estilos de Forma" as UC36
     }
 
     ' -- Reportes --
@@ -96,26 +101,30 @@ rectangle "Sistema de Administración\nInstituto de Kung Fu" {
 ' RELACIONES DE ACTORES
 ' ========================
 
-' Director
-director --> UC01
-director --> UC04
-director --> UC05
-director --> UC06
-director --> UC08
-director --> UC09
-director --> UC10
-director --> UC11
-director --> UC13
-director --> UC14
-director --> UC15
-director --> UC19
-director --> UC20
-director --> UC21
-director --> UC23
-director --> UC28
-director --> UC29
-director --> UC30
-director --> UC31
+' Administrador
+admin --> UC01
+admin --> UC04
+admin --> UC05
+admin --> UC06
+admin --> UC08
+admin --> UC09
+admin --> UC10
+admin --> UC11
+admin --> UC13
+admin --> UC14
+admin --> UC15
+admin --> UC19
+admin --> UC20
+admin --> UC21
+admin --> UC23
+admin --> UC28
+admin --> UC29
+admin --> UC30
+admin --> UC31
+admin --> UC32
+admin --> UC33
+admin --> UC35
+admin --> UC36
 
 ' Instructor
 instructor --> UC01
@@ -130,6 +139,8 @@ instructor --> UC20
 instructor --> UC24
 instructor --> UC25
 instructor --> UC27
+instructor --> UC34
+instructor --> UC35
 
 ' Alumno
 alumno --> UC01
@@ -140,6 +151,7 @@ alumno --> UC18
 alumno --> UC20
 alumno --> UC21
 alumno --> UC27
+alumno --> UC34
 
 ' Sistema automático
 sistema --> UC22 : programado
@@ -155,5 +167,8 @@ UC24 .> UC25 : <<extend>>\n[si aprobado]
 UC25 .> UC26 : <<extend>>
 UC20 .> UC22 : <<extend>>\n[si vencido]
 UC05 .> UC16 : <<extend>>
+UC32 .> UC33 : <<include>>
+UC24 .> UC34 : <<include>>
+UC36 .> UC32 : <<include>>
 
 @enduml

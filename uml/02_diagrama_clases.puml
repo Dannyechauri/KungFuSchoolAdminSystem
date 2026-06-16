@@ -32,10 +32,10 @@ abstract class Persona {
     + calcularEdad()      : INT
 }
 
-class Director {
-    - id_director   : INT <<PK>>
-    - rfc           : VARCHAR(13)
-    - fecha_inicio  : DATE
+class Administrador {
+    - id_administrador : INT <<PK>>
+    - rfc              : VARCHAR(13)
+    - fecha_inicio     : DATE
     + gestionarInstituto()
     + generarReportes()
     + asignarInstructor()
@@ -47,6 +47,7 @@ class Instructor {
     - especialidad       : VARCHAR(100)
     - fecha_contratacion : DATE
     - activo             : BOOLEAN
+    - formas_conocidas   : List<Forma>
     + impartirClase()
     + evaluarAlumno()
     + registrarAsistencia()
@@ -61,6 +62,7 @@ class Alumno {
     - tutor_nombre       : VARCHAR(200)
     - tutor_telefono     : VARCHAR(15)
     - activo             : BOOLEAN
+    - formas_aprendidas  : List<Forma>
     + inscribirse()
     + realizarPago()
     + solicitarGraduacion()
@@ -70,23 +72,28 @@ class Alumno {
 ' CLASES Y HORARIOS
 ' ========================
 
-class Clase {
-    - id_clase     : INT <<PK>>
-    - nombre       : VARCHAR(100)
-    - descripcion  : VARCHAR(255)
-    - nivel        : VARCHAR(50)
-    - capacidad_max: INT
-    - salon        : VARCHAR(50)
+class Curso {
+    - id_curso      : INT <<PK>>
+    - nombre        : VARCHAR(100)
+    - tema          : VARCHAR(120)
+    - descripcion   : VARCHAR(255)
+    - fecha_hora    : DATETIME
     + obtenerInscritos()
     + verificarDisponibilidad() : BOOLEAN
 }
 
-class Horario {
-    - id_horario   : INT <<PK>>
-    - dia_semana   : ENUM('Lun','Mar','Mie','Jue','Vie','Sab','Dom')
-    - hora_inicio  : TIME
-    - hora_fin     : TIME
-    + getDuracion() : INT
+class Forma {
+    - id_forma        : INT <<PK>>
+    - nombre          : VARCHAR(120)
+    - descripcion     : VARCHAR(255)
+    - estilo          : Estilo
+    + esOpcionalPara(grado: Grado) : BOOLEAN
+}
+
+enum Estilo {
+    VING_TSUN
+    JUNGAR
+    SHAOLIN
 }
 
 class Inscripcion {
@@ -141,6 +148,7 @@ class Grado {
     - descripcion    : VARCHAR(255)
     - color_cinturon : VARCHAR(30)
     - orden          : INT
+    - formas_requeridas : INT
     + getSiguienteGrado() : Grado
 }
 
@@ -162,7 +170,7 @@ class Usuario {
     - id_usuario  : INT <<PK>>
     - username    : VARCHAR(50)
     - password_hash: VARCHAR(255)
-    - rol         : ENUM('director','instructor','alumno')
+    - rol         : ENUM('administrador','instructor','alumno')
     - activo      : BOOLEAN
     - ultimo_acceso: DATETIME
     + autenticar(password: String) : BOOLEAN
@@ -174,27 +182,30 @@ class Usuario {
 ' RELACIONES DE HERENCIA
 ' ========================
 
-Persona <|-- Director
-Persona <|-- Instructor
+Persona <|-- Administrador
 Persona <|-- Alumno
+Alumno <|-- Instructor
 
 ' ========================
 ' RELACIONES DE ASOCIACIÓN
 ' ========================
 
-Director "1" --> "0..*" Instructor      : contrata >
-Instructor "1" --> "0..*" Clase         : imparte >
-Clase "1" --> "1..*" Horario            : tiene >
+Administrador "1" --> "0..*" Instructor : contrata >
+Instructor "1" --> "0..*" Curso         : imparte >
 Alumno "1" --> "0..*" Inscripcion       : realiza >
-Inscripcion "0..*" --> "1" Clase        : pertenece a >
+Inscripcion "0..*" --> "1" Curso        : pertenece a >
 Alumno "1" --> "0..*" Asistencia        : registra >
-Asistencia "0..*" --> "1" Clase         : en >
+Asistencia "0..*" --> "1" Curso         : en >
 Alumno "1" --> "0..*" Pago              : efectua >
 Pago "0..*" --> "1" Mensualidad         : cubre >
 Alumno "1" --> "0..*" Graduacion        : presenta >
 Instructor "1" --> "0..*" Graduacion    : evalua >
 Graduacion "0..*" --> "1" Grado         : otorga >
 Persona "1" --> "1" Usuario             : tiene cuenta >
-Director "1" --> "0..*" Mensualidad     : define >
+Administrador "1" --> "0..*" Mensualidad : define >
+Grado "1" --> "1..*" Forma              : requiere >
+Grado "1" --> "0..*" Forma              : opcional >
+Alumno "0..*" --> "0..*" Forma          : aprende >
+Instructor "0..*" --> "0..*" Forma      : conoce >
 
 @enduml

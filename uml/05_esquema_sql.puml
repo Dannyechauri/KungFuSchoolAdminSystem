@@ -29,11 +29,11 @@ entity "personas" as personas {
     * fecha_registro  : DATETIME DEFAULT NOW()
 }
 
-entity "directores" as directores {
-    * id_director   : INT <<PK, FK>>
+entity "administradores" as administradores {
+    * id_administrador : INT <<PK, FK>>
     --
-    rfc             : VARCHAR(13) UNIQUE
-    * fecha_inicio  : DATE NOT NULL
+    rfc                : VARCHAR(13) UNIQUE
+    * fecha_inicio     : DATE NOT NULL
 }
 
 entity "instructores" as instructores {
@@ -63,7 +63,7 @@ entity "usuarios" as usuarios {
     * id_persona    : INT <<FK>>
     * username      : VARCHAR(50) UNIQUE NOT NULL
     * password_hash : VARCHAR(255) NOT NULL
-    * rol           : ENUM('director','instructor','alumno')
+    * rol           : ENUM('administrador','instructor','alumno')
     * activo        : TINYINT(1) DEFAULT 1
     ultimo_acceso   : DATETIME
 }
@@ -75,33 +75,60 @@ entity "grados" as grados {
     descripcion      : VARCHAR(255)
     * color_cinturon : VARCHAR(30) NOT NULL
     * orden          : INT UNIQUE NOT NULL
+    * formas_requeridas: INT NOT NULL DEFAULT 0
 }
 
-entity "clases" as clases {
-    * id_clase      : INT <<PK, AUTO_INCREMENT>>
+entity "cursos" as cursos {
+    * id_curso      : INT <<PK, AUTO_INCREMENT>>
     --
     * id_instructor : INT <<FK>>
     * nombre        : VARCHAR(100) NOT NULL
+    * tema          : VARCHAR(120) NOT NULL
     descripcion     : VARCHAR(255)
-    * nivel         : VARCHAR(50) NOT NULL
-    * capacidad_max : INT DEFAULT 20
-    salon           : VARCHAR(50)
+    * fecha_hora   : DATETIME NOT NULL
 }
 
-entity "horarios" as horarios {
-    * id_horario  : INT <<PK, AUTO_INCREMENT>>
+entity "estilos" as estilos {
+    * id_estilo    : INT <<PK, AUTO_INCREMENT>>
     --
-    * id_clase    : INT <<FK>>
-    * dia_semana  : ENUM('Lun','Mar','Mie','Jue','Vie','Sab','Dom')
-    * hora_inicio : TIME NOT NULL
-    * hora_fin    : TIME NOT NULL
+    * nombre       : VARCHAR(50) UNIQUE NOT NULL
+    descripcion    : VARCHAR(255)
+}
+
+entity "formas" as formas {
+    * id_forma     : INT <<PK, AUTO_INCREMENT>>
+    --
+    * id_estilo    : INT <<FK>>
+    * nombre       : VARCHAR(120) UNIQUE NOT NULL
+    descripcion    : VARCHAR(255)
+}
+
+entity "grado_forma" as grado_forma {
+    * id_grado     : INT <<PK, FK>>
+    * id_forma     : INT <<PK, FK>>
+    --
+    * es_opcional  : TINYINT(1) DEFAULT 0
+}
+
+entity "alumno_forma" as alumno_forma {
+    * id_alumno    : INT <<PK, FK>>
+    * id_forma     : INT <<PK, FK>>
+    --
+    * fecha_aprendida: DATE NOT NULL
+}
+
+entity "instructor_forma" as instructor_forma {
+    * id_instructor: INT <<PK, FK>>
+    * id_forma     : INT <<PK, FK>>
+    --
+    * fecha_dominio: DATE
 }
 
 entity "inscripciones" as inscripciones {
     * id_inscripcion   : INT <<PK, AUTO_INCREMENT>>
     --
     * id_alumno        : INT <<FK>>
-    * id_clase         : INT <<FK>>
+    * id_curso         : INT <<FK>>
     * fecha_inscripcion: DATE NOT NULL DEFAULT NOW()
     * estado           : ENUM('activa','inactiva','suspendida') DEFAULT 'activa'
 }
@@ -110,7 +137,7 @@ entity "asistencias" as asistencias {
     * id_asistencia : INT <<PK, AUTO_INCREMENT>>
     --
     * id_alumno     : INT <<FK>>
-    * id_clase      : INT <<FK>>
+    * id_curso      : INT <<FK>>
     * fecha         : DATE NOT NULL
     * presente      : TINYINT(1) NOT NULL
     justificacion   : VARCHAR(255)
@@ -119,7 +146,7 @@ entity "asistencias" as asistencias {
 entity "mensualidades" as mensualidades {
     * id_mensualidad : INT <<PK, AUTO_INCREMENT>>
     --
-    * id_director    : INT <<FK>>
+    * id_administrador : INT <<FK>>
     * anio           : INT NOT NULL
     * mes            : TINYINT NOT NULL
     * monto_base     : DECIMAL(10,2) NOT NULL
@@ -155,23 +182,31 @@ entity "graduaciones" as graduaciones {
 ' RELACIONES FK
 ' ========================
 
-personas ||--o| directores     : "id_persona (herencia)"
-personas ||--o| instructores   : "id_persona (herencia)"
+personas ||--o| administradores : "id_persona (herencia)"
 personas ||--o| alumnos        : "id_persona (herencia)"
+alumnos ||--o| instructores    : "id_alumno (herencia)"
 personas ||--|| usuarios       : "id_persona"
 
-directores ||--o{ mensualidades   : "id_director"
-instructores ||--o{ clases        : "id_instructor"
+administradores ||--o{ mensualidades : "id_administrador"
+instructores ||--o{ cursos           : "id_instructor"
 instructores ||--o{ graduaciones  : "id_instructor"
+instructores ||--o{ instructor_forma : "id_instructor"
 
-clases ||--o{ horarios        : "id_clase"
-clases ||--o{ inscripciones   : "id_clase"
-clases ||--o{ asistencias     : "id_clase"
+cursos ||--o{ inscripciones   : "id_curso"
+cursos ||--o{ asistencias     : "id_curso"
+
+estilos ||--o{ formas         : "id_estilo"
+grados ||--o{ grado_forma     : "id_grado"
+formas ||--o{ grado_forma     : "id_forma"
 
 alumnos ||--o{ inscripciones  : "id_alumno"
 alumnos ||--o{ asistencias    : "id_alumno"
 alumnos ||--o{ pagos          : "id_alumno"
 alumnos ||--o{ graduaciones   : "id_alumno"
+alumnos ||--o{ alumno_forma   : "id_alumno"
+
+formas ||--o{ alumno_forma    : "id_forma"
+formas ||--o{ instructor_forma: "id_forma"
 
 mensualidades ||--o{ pagos    : "id_mensualidad"
 grados ||--o{ graduaciones    : "id_grado"
