@@ -1,3 +1,9 @@
-[submodule "KungFuAndroidApp"]
-	path = KungFuAndroidApp
-	url = https://github.com/Dannyechauri/KungFuSchoolAndroidApp
+[submodule "KungFuBackendService"]
+	path = KungFuBackendService
+	url = https://github.com/Dannyechauri/KungFuBackendService.git
+[submodule "KungFuSchoolAndroidApp"]
+	path = KungFuSchoolAndroidApp
+	url = https://github.com/Dannyechauri/KungFuSchoolAndroidApp.git
+[submodule "KungFuSchoolWebPage"]
+	path = KungFuSchoolWebPage
+	url = https://github.com/Dannyechauri/KungFuSchoolWebPage.git
