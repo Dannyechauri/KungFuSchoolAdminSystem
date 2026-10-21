@@ -68,7 +68,7 @@ Dar las tareas sin indicar cada clic. Observar dónde se atasca cada participant
 2. Filtrar por sala y revisar qué espacios quedan disponibles.
 3. Crear una sesión puntual y cambiarle hora, duración, instructor o sala.
 4. Crear un horario recurrente y modificar una ocurrencia concreta.
-5. Crear o programar un curso especial de varios días.
+5. Crear o programar un curso especial de varios días como sesiones independientes por jornada.
 6. Provocar un conflicto en la misma sala y comprobar que el aviso se entiende; repetir en otra sala.
 7. Cancelar una sesión o regla y comprobar qué queda visible en el calendario.
 
@@ -111,7 +111,7 @@ npm run build
 ## Última verificación realizada
 
 - Backend: typecheck, lint, **16 pruebas**, build y `npm audit`; todo pasa y la auditoría da 0 vulnerabilidades.
-- Web: **4 pruebas**, lint, build y auditoría completa; todo pasa y la auditoría da 0 vulnerabilidades.
+- Web: **8 pruebas**, lint, build y auditoría completa; todo pasa y la auditoría da 0 vulnerabilidades.
 - Android: no se ha cambiado; `./gradlew test` no pudo arrancar porque este entorno no tiene un runtime Java instalado. Además, el prototipo Android aún no llama a esta API.
 - Windows y prueba manual con el maestro/instructores: pendientes.
 
