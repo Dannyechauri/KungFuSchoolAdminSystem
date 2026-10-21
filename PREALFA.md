@@ -35,7 +35,7 @@ No hay un rol supremo, niveles distintos de instructor ni capacidades adicionale
 - [x] Web: pruebas de navegación por rol, acceso del instructor a gestión de salas y rechazo de `USER`.
 - [x] El Android actual sigue siendo un prototipo sin llamadas a este backend; no se han cambiado sus flujos.
 - [ ] Ejecutar pruebas Android cuando haya un JDK instalado y la app empiece a consumir la API.
-- [ ] Hacer una prueba manual de los flujos web en el PC Windows de la escuela.
+- [ ] Hacer una prueba manual de los flujos web en el PC Windows de la escuela siguiendo [PRUEBA-WINDOWS.md](PRUEBA-WINDOWS.md).
 
 ### 3. Preparar entorno privado de prealfa — pendiente de proveedor y secretos
 
