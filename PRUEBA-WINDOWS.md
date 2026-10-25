@@ -85,12 +85,14 @@ npm.cmd run dev
 
 El primer arranque crea la base local `kungfu_school_dev`, aplica las migraciones y carga los datos ficticios. La web estará en http://127.0.0.1:8000/ y el backend en http://127.0.0.1:8080. Deja abierta esa ventana de PowerShell mientras haces la prueba; para apagarlo, pulsa `Ctrl+C`.
 
-Para probar la agenda como instructor:
+Para probar la agenda como instructor (un alumno marcado como instructor):
 
 ```text
 Correo: chen.wei@wushu.test
-Contraseña: WushuDemo2026!
+Contraseña: chenwei
 ```
+
+Los alumnos e instructores entran con su correo y, como contraseña inicial, su nombre en minúsculas, sin acentos ni espacios (por ejemplo `alumno.02@wushu.test` / `marcsoler`). Un alumno sin permisos de instructor ve el calendario en solo lectura. El administrador (`admin@wushu.test` / `WushuDemo2026!`) puede cambiar cualquier contraseña desde Datos → Alumnos → Editar.
 
 Estas credenciales solo existen en la base de demostración local. No las uses para ningún entorno online.
 

@@ -10,20 +10,24 @@ Grupo sugerido: el maestro y 2–4 instructores durante una o dos semanas. Empez
 
 | Rol | Uso en la prealfa | Permisos |
 | --- | --- | --- |
-| `ADMIN` | Una única cuenta de intervención, custodiada por el equipo de desarrollo | Acceso total de gestión, incluida la sección provisional Datos. No se crean cuentas ADMIN para maestros, instructores ni alumnos. |
-| `INSTRUCTOR` | Cuenta individual para el maestro y cada instructor participante | Consultar y gestionar sesiones, cursos, horarios recurrentes y salas. Sin acceso al editor genérico de Datos ni a datos personales de alumnos. |
-| `USER` | No se usa en la web | Se conserva en la API para futuros flujos de la app de alumnos. El inicio de sesión web lo rechaza. |
+| `ADMIN` | Una única cuenta de administración | Única cuenta que puede dar de alta y modificar alumnos, cursos, salas, grados, formas, estilos y demás datos (sección Datos). Cambia las contraseñas de los alumnos desde Datos → Alumnos → Editar. Fija el límite de participantes de cada actividad u horario (o sin límite) y decide si los alumnos ven cuántos asisten. |
+| `INSTRUCTOR` | Alumno con `es_instructor` activado | Mismo inicio de sesión que su cuenta de alumno. Programa, edita y cancela sesiones y horarios recurrentes. Se apunta a actividades como alumno o como instructor (este último no ocupa plaza) y ve siempre el número y la lista de participantes. Ve su ficha en «Mi ficha» y marca las formas de su grado que está aprendiendo y su avance. No crea ni edita cursos, salas ni otros datos, ni accede a Datos. |
+| `USER` | Cuenta de cada alumno | Consulta el calendario, se apunta o se quita de actividades (un día concreto o toda la serie), ve su ficha (datos, formas que sabe y formas obligatorias y opcionales de su grado) en «Mi ficha», donde marca las que está aprendiendo y su % de avance, y gestiona su propia asistencia. |
 
-No hay un rol supremo, niveles distintos de instructor ni capacidades adicionales que activar. La base de datos impone una sola cuenta ADMIN. La web no ofrece registro público; las cuentas de instructores se preparan antes de invitar al grupo.
+Solo hay dos tipos de cuenta: la del administrador y la de cada alumno. Ser instructor es un indicador del alumno (`alumnos.es_instructor`); al activarlo, la base crea o reactiva su registro en `instructores`, y al desactivarlo lo deja inactivo (nunca lo borra, porque la agenda lo referencia). El rol se recalcula en cada petición, así que el cambio se aplica sin volver a iniciar sesión. Al crear un alumno sin contraseña, su contraseña inicial es su nombre en minúsculas, sin acentos ni espacios; las contraseñas nuevas que fije el administrador deben tener al menos 8 caracteres. La base de datos impone una sola cuenta ADMIN y la web no ofrece registro público.
 
 ## Plan y estado
 
 ### 1. Modelo de acceso y permisos — implementado
 
 - [x] Mantener los tres roles existentes y adoptar el uso acordado.
-- [x] Dar a `INSTRUCTOR` gestión completa del calendario, incluidos cursos, recurrencias y salas.
+- [x] V16: cuentas solo para el administrador y los alumnos; `es_instructor` en el alumno da permisos de instructor; contraseña inicial derivada del nombre.
+- [x] V17: participantes en actividades, con límite de plazas, inscripción a un día o a la serie y visibilidad del número de asistentes decidida por el administrador.
+- [x] V18: al desactivar un alumno se le quita de las actividades futuras y de sus series; las asistencias de fechas pasadas no se pueden borrar.
+- [x] V19: los alumnos marcan las formas de su grado (obligatorias y opcionales) que están aprendiendo y su porcentaje de avance; al registrar la forma como sabida, el avance se retira.
+- [x] Dar a `INSTRUCTOR` la gestión de sesiones y recurrencias; cursos, salas y demás altas quedan para `ADMIN`.
 - [x] Reservar `/api/database` y la pantalla Datos a `ADMIN`; los instructores reciben solo los datos mínimos de agenda que necesitan.
-- [x] Rechazar `USER` en el login web y cerrar su sesión web; conservar el rol en el backend para la futura app.
+- [x] Admitir `USER` en la web con el calendario en solo lectura.
 - [x] Impedir crear una segunda cuenta ADMIN desde la API y evitar borrar la única cuenta.
 - [x] Añadir una restricción de base de datos que limita ADMIN a una cuenta.
 - [x] Retirar el endpoint HTTP de migración; usar el arranque del backend o `npm run db:migrate`.
@@ -32,9 +36,9 @@ No hay un rol supremo, niveles distintos de instructor ni capacidades adicionale
 ### 2. Pruebas automatizadas — implementado en web y backend
 
 - [x] Backend: cobertura de login/sesiones, API genérica de Datos, separación de roles, cuenta ADMIN única y edición del calendario y salas.
-- [x] Web: pruebas de navegación por rol, acceso del instructor a gestión de salas y rechazo de `USER`.
-- [x] El Android actual sigue siendo un prototipo sin llamadas a este backend; no se han cambiado sus flujos.
-- [ ] Ejecutar pruebas Android cuando haya un JDK instalado y la app empiece a consumir la API.
+- [x] Web: pruebas de navegación por rol, gestión de agenda del instructor sin cursos ni salas, y calendario de solo lectura para `USER`.
+- [x] Android consume la API del backend (perfil, formas, calendario, participación y agenda) con las mismas reglas por rol que la web.
+- [x] Pruebas unitarias Android (.\gradlew.bat :app:testDebugUnitTest) de mapeo de respuestas y validaciones.
 - [ ] Hacer una prueba manual de los flujos web en el PC Windows de la escuela siguiendo [PRUEBA-WINDOWS.md](PRUEBA-WINDOWS.md).
 
 ### 3. Preparar entorno privado de prealfa — pendiente de proveedor y secretos

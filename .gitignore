@@ -1,2 +1,33 @@
-# Archivos de macOS.
+# Archivos de sistema.
 .DS_Store
+Thumbs.db
+Desktop.ini
+
+# Credenciales y configuración de entorno local.
+.env
+.env.*
+!.env.example
+!.env.*.example
+
+# Preferencias locales del workspace.
+/.vscode/settings.json
+
+# Diagramas y documentación generados.
+/uml/output/
+
+# Dependencias, caches y artefactos de compilación.
+node_modules/
+dist/
+coverage/
+build/
+.gradle/
+.kotlin/
+.idea/
+*.iml
+local.properties
+
+# Logs.
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
